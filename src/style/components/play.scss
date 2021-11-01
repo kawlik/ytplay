@@ -1,0 +1,92 @@
+.play {
+
+    position: relative;
+    background-color: $c-light;
+    
+    width: 100%;
+
+    padding: 1.5rem 1rem;
+    gap: 2rem 1rem;
+
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+
+    justify-content: space-around;
+    align-content: center;
+    align-items: center;
+
+    button {
+
+        outline: none;
+        border: none;
+        
+        height: 2rem;
+        width: 2rem;
+
+        cursor: pointer;
+        background-color: white;
+        border-radius: 5rem;
+
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+        animation-fill-mode: both;
+        animation-duration: 1.5s;
+
+        animation-name: buttonPulse;
+
+        svg {
+
+            vertical-align: middle;
+            color: $c-action;
+
+            height: 1.5rem;
+            width: 1.5rem;
+        }
+
+        &.play-pause {
+
+            height: 2.5rem;
+            width: 2.5rem;
+            
+            svg {
+
+                height: 2rem;
+                width: 2rem;
+            }
+        }
+    }
+
+    .timing {
+
+        flex-basis: 100%;
+        color: $c-action;
+
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+    
+        justify-content: space-between;
+        align-content: center;
+        align-items: center;
+
+        .track {
+            flex-basis: 100%;
+        }
+
+        span {
+            font-weight: 100;
+        }
+    }
+}
+
+
+@keyframes buttonPulse {
+    
+    from {
+        box-shadow: 0 0 1rem -0.3rem #00eeaa;
+    } to {
+        box-shadow: 0 0 1rem -0.1rem #00eeaa;
+    }
+}
