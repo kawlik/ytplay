@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
-// local modules
-import Song from '@/components/view/song';
-import Add from '@/components/view/add';
+// store context
+import { StoreContext } from '../context/store';
 
 
 /*  Component schema
@@ -10,22 +9,18 @@ import Add from '@/components/view/add';
 
 export default function View() {
 
-    
+    // global state
+    const { state, dispatchState } = useContext( StoreContext );
+
 
 /*  Component layout
 /*   *   *   *   *   *   *   *   *   *   */
 
 return(
     <>
-        <section className='view' style={{ backgroundImage: '' }}>
+        <section className='view' style={{ backgroundImage: `url( ${ state.next[0] ? state.next[0].img : '' }` }}>
             
-            <div className='backdrop'>
-
-                <Song target='Teraz' />
-
-                <Add />
-
-            </div>
+            <div className='backdrop'></div>
 
         </section>
     </>

@@ -14,7 +14,6 @@ import Play from '@/components/play';
 
 export default function App() {
 
-    
 
 /*  Component layout
 /*   *   *   *   *   *   *   *   *   *   */

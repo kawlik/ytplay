@@ -1,92 +1,129 @@
 .play {
 
-    position: relative;
     background-color: $c-light;
-    
-    width: 100%;
+    width: 100%;    
 
-    padding: 1.5rem 1rem;
-    gap: 2rem 1rem;
+    gap: 1rem;
+    padding: 1rem;
+    padding-bottom: 2rem;
 
     display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
+    flex-wrap: nowrap;
+    flex-direction: column;
 
     justify-content: space-around;
     align-content: center;
     align-items: center;
 
-    button {
+    .row {
 
-        outline: none;
-        border: none;
-        
-        height: 2rem;
-        width: 2rem;
-
-        cursor: pointer;
-        background-color: white;
-        border-radius: 5rem;
-
-        animation-timing-function: ease-in-out;
-        animation-iteration-count: infinite;
-        animation-direction: alternate;
-        animation-fill-mode: both;
-        animation-duration: 1.5s;
-
-        animation-name: buttonPulse;
-
-        svg {
-
-            vertical-align: middle;
-            color: $c-action;
-
-            height: 1.5rem;
-            width: 1.5rem;
-        }
-
-        &.play-pause {
-
-            height: 2.5rem;
-            width: 2.5rem;
-            
-            svg {
-
-                height: 2rem;
-                width: 2rem;
-            }
-        }
-    }
-
-    .timing {
-
-        flex-basis: 100%;
-        color: $c-action;
+        width: 100%;
 
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         flex-direction: row;
     
-        justify-content: space-between;
+        justify-content: space-evenly;
         align-content: center;
         align-items: center;
 
-        .track {
-            flex-basis: 100%;
-        }
+        &.info {
 
-        span {
-            font-weight: 100;
-        }
-    }
-}
+            color: $c-action;
+            overflow-x: hidden;
+            gap: 0.5rem;
 
+            flex-direction: column;
+            justify-content: space-around;
 
-@keyframes buttonPulse {
+            p {
+
+                height: 1.5rem;
+                width: 90%;
+
+                overflow-x: hidden;
+                position: relative;
+
+                span {
+
+                    position: absolute;
+                    top: 50%;
+                    left: 0;
+
+                    width: max-content;
+                    transform: translateX( 0 ) translateY( -50% );
+
+                    &.title {
+
+                        font-style: italic;
+                        font-size: 1.1rem;
+                    }
     
-    from {
-        box-shadow: 0 0 1rem -0.3rem #00eeaa;
-    } to {
-        box-shadow: 0 0 1rem -0.1rem #00eeaa;
+                    &.author {
+    
+                        text-transform: uppercase;
+                        letter-spacing: 0.1rem;
+                        font-size: 0.9rem;
+                    }
+                }
+            }
+        }
+
+        &.timing {
+
+            flex-wrap: wrap;
+            justify-content: space-between;
+
+            .track {
+                flex-basis: 100%;
+                display: block;
+            }
+
+            span {
+
+                color: $c-action;
+            }
+        }
+
+        &.actions {
+
+            gap: 1rem;
+
+            button {
+
+                border: none;
+                outline: none;
+                border-radius: 3rem;
+
+                background-color: #ffffff;
+                box-shadow: 0 0 1rem -0.2rem #00eeaa;
+                transition: all ease 0.2s;
+
+                height: 2.5rem;
+                width: 2.5rem;
+
+                &.play-pause {
+
+                    height: 3rem;
+                    width: 3rem;    
+                }
+
+                svg {
+
+                    font-size: 1.75rem;
+                    vertical-align: middle;
+                    color: $c-action;
+                }
+
+                &:active {
+
+                    transform: scale( 0.95 );
+                    box-shadow: 0 0 1rem -0.1rem #00eeaa;
+                }
+            }
+        }
     }
 }
+
+/*  Animations
+/*   *   *   *   *   *   *   *   *   *   */

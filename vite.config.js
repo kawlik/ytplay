@@ -15,11 +15,15 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
 
 
+    // base url path
+    base: '/ytplay/',
+
+
     // enable plugins
     plugins: [
 
         VitePWA( config.PWA ),
-        
+
         react(),
     ],
 
