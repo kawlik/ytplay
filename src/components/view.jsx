@@ -10,7 +10,7 @@ import { StoreContext } from '../context/store';
 export default function View() {
 
     // global state
-    const { state, dispatchState } = useContext( StoreContext );
+    const { state } = useContext( StoreContext );
 
 
 /*  Component layout
@@ -18,10 +18,8 @@ export default function View() {
 
 return(
     <>
-        <section className='view' style={{ backgroundImage: `url( ${ state.next[0] ? state.next[0].img : '' }` }}>
+        <section className='view' style={{ backgroundImage: `url( ${ state.next[0] ? state.next[0].img : '' } )` }}>
             
-            <div className='backdrop'></div>
-
         </section>
     </>
 )};

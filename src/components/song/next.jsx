@@ -1,23 +1,24 @@
 import React from 'react';
 
 // icons
-import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
-import ReplayIcon from '@mui/icons-material/Replay';
+import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CloseIcon from '@mui/icons-material/Close';
 
 
 /*  Component schema
 /*   *   *   *   *   *   *   *   *   *   */
 
-export default function OnPlaylist({ song, action, onPlaylistNext }) {
+export default function Next({ song, actions }) {
 
 
+    
 /*  Component layout
 /*   *   *   *   *   *   *   *   *   *   */
 
 return(
     <>
-        <li className='on-playlist'>
+        <li className='song'>
 
             <img className='img' src={ song.img } alt={ song.author }/>
 
@@ -29,9 +30,15 @@ return(
 
             </div>
 
-            <button className='action' onClick={ () => action( song ) }>
-                { onPlaylistNext ? <CloseIcon /> : <ReplayIcon /> }
-            </button>
+            <div className='actions'>
+
+                <button onClick={ () => actions[0]( song ) }><PlayArrowIcon /></button>
+
+                <button onClick={ () => actions[1]( song ) }><PlaylistPlayIcon /></button>
+
+                <button onClick={ () => actions[2]( song ) }><CloseIcon /></button>
+
+            </div>
 
         </li>
     </>

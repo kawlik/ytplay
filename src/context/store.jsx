@@ -1,4 +1,8 @@
-import React, { createContext, useEffect, useReducer } from 'react';
+import React, { createContext, useEffect, useRef, useReducer, useState } from 'react';
+import axios from 'axios';
+
+// global config
+import config from '@/config/config';
 
 
 /*  Component schema
@@ -8,6 +12,10 @@ export const StoreContext = createContext( null );
 
 export function StoreProvider({ children }) {
 
+
+    // global audio objct ref
+    const audio = useRef( new Audio() );
+    const [ paused, setPaused ] = useState( true );
 
     // global state object
     const [ state, dispatchState ] = useReducer( stateReducer, {
@@ -20,53 +28,174 @@ export function StoreProvider({ children }) {
     });
 
 
+/*  Component handlers
+/*   *   *   *   *   *   *   *   *   *   */
 
-    // store global object
-    const storeValue = {
+    function loadAndPlay() {
+        audio.current.pause();
+        setPaused( true );
 
-        // global state
-        state, dispatchState,
+        if ( state.next[0] ) {
+
+            audio.current.src = state.next[0].src;
+            audio.current.load();
+            audio.current.play();
+            setPaused( false );
+        };
+    };
+
+    function toggleAudio() {
+
+        if( audio.current.src ) {
+
+            if( audio.current.paused ){
+
+                audio.current.play();
+                setPaused( false );
+
+            } else {
+
+                audio.current.pause();
+                setPaused( true );
+            }
+
+        } else {
+
+            if( state.next[0] ) {
+
+                audio.current.src = state.next[0].src;
+                audio.current.load();
+                audio.current.play();
+                setPaused( false );
+            }
+        }
+    };
+
+    function playNext() {
+        audio.current.pause();
+        setPaused( true );
+
+        if( state.next[1] ) {
+            audio.current.src = state.next[1].src;
+            audio.current.load();
+            audio.current.play();
+            setPaused( false );
+        }
+
+        dispatchState({ type: 'play-next' })
+    };
+
+    function playPrev() {
+        audio.current.pause();
+        setPaused( true );
+
+        if( state.prev[0] ) {
+            audio.current.src = state.prev[0].src;
+            audio.current.load();
+            audio.current.play();
+            setPaused( false );
+        }
+
+        dispatchState({ type: 'play-prev' })
+    };
+
+    function playNow( payload ) {
+        audio.current.pause();
+
+        audio.current.src = payload.src;
+        audio.current.load();
+        audio.current.play();
+        setPaused( false );
+
+        dispatchState({ type: 'play-now', payload: payload });
+    };
+    
+    function addNext( payload ) {
+
+        if( !state.next[0] ) {
+
+            audio.current.src = payload.src;
+            audio.current.load();
+            audio.current.play();
+            setPaused( false );
+        }
+
+        dispatchState({ type: 'add-next', payload: payload });
     };
 
 
-    // store init
-    useEffect(() => {
+    function add( payload ) {
 
+        if( !state.next[0] ) {
 
-        // init state with saved state
-        const localNext = JSON.parse( localStorage.getItem( 'ytplay.next' ) || null );
-        const localPrev = JSON.parse( localStorage.getItem( 'ytplay.prev' ) || null );
+            audio.current.src = payload.src;
+            audio.current.load();
+            audio.current.play();
+            setPaused( false );
+        }
 
-        // creat state init object
-        const initPayload = {
-            next: localNext?.length ? localNext : [],
-            prev: localPrev?.length ? localPrev : [],
+        dispatchState({ type: 'add', payload: payload });
+    };
+
+    function remove( payload ) {
+
+        if( state.next[0].src === payload.src ) {
+            audio.current.pause();
+            setPaused( true );
         };
 
-        // initial dispatch
-        dispatchState({ type: 'read', payload: initPayload });
+        dispatchState({ type: 'remove', payload: payload });
+    };
+
+
+    //  read stored data
+    useEffect(() => {
+
+        // read local data
+        const localNext = JSON.parse( localStorage.getItem( 'ytplay.next' ));
+        const localPrev = JSON.parse( localStorage.getItem( 'ytplay.prev' ));
+
+        // create payload
+        const payload = {
+            next: localNext?.length ? localNext : [],
+            prev: localPrev?.length ? localNext : [],
+        };
+
+        // make initial dispatch
+        dispatchState({ type: 'init', payload: payload });
 
     }, []);
 
 
-    // store save
+    //  storage method
     useEffect(() => {
 
-        // save state in local storage
-        if( state.next.length ) {
-            localStorage.setItem( 'ytplay.next', JSON.stringify( state.next ));
-        }
-
-        if( state.prev.length ) {
-            localStorage.setItem( 'ytplay.prev', JSON.stringify( state.prev ));    
-        }
-
+        // read local data
+        localStorage.setItem( 'ytplay.next', JSON.stringify( state.next ));
+        localStorage.setItem( 'ytplay.prev', JSON.stringify( state.prev ));
 
     });
 
-
+    
 /*  Component layout
 /*   *   *   *   *   *   *   *   *   *   */
+
+// store global object
+const storeValue = {
+
+    // global audio ref & state
+    audio, paused, state,
+
+    // global state
+    loadAndPlay,
+    toggleAudio,
+    playNext,
+    playPrev,
+    playNow,
+    addNext,
+    add,
+    remove,
+};
 
 return(
     <>
@@ -86,50 +215,93 @@ return(
 function stateReducer( state, action ) {
     switch( action.type ) {
 
+        // palys next song
+        case 'play-next':
+        if( state.next[0] ) {
 
-        // add song to playlist
+            return {
+                next: [ ...new Set( state.next.slice( 1 ) )],
+                prev: [ ...new Set([ state.next[0], ...state.prev ])],
+            };
+
+        } else {
+            
+            return {
+                next: [],
+                prev: state.prev,
+            };
+        }
+
+        // palys prev song
+        case 'play-prev':
+        if( state.prev[0] ) {
+
+            return {
+                next: [ ...new Set([ state.prev[0], ...state.next ])],
+                prev: [ ...new Set( state.prev.slice( 1 ) )],
+            };
+
+        } else {
+            
+            return {
+                next: state.next,
+                prev: [],
+            };
+        }
+
+        // plays selected song
+        case 'play-now':
+        if( state.next[0] ) {
+
+            return {
+                next: [ ...new Set([ action.payload, ...state.next.slice( 1 ) ])],
+                prev: [ ...new Set([ state.next[0], ...state.prev.filter( e => e.id !== action.payload.id )])],
+            };
+
+        } else {
+            
+            return {
+                next: [ action.payload ],
+                prev: state.prev,
+            };
+        }
+
+        // adds song as next to list
+        case 'add-next':
+        if( state.next[0] ) {
+
+            return {
+                next: [ ...new Set([ state.next[0], action.payload, ...state.next ])],
+                prev: state.prev,
+            };
+
+        } else {
+            
+            return {
+                next: [ action.payload ],
+                prev: state.prev,
+            };
+        }
+        
+        // adds song to list
         case 'add':
         return {
-            ...state,
-            next: [ action.payload, ...state.next.filter( song => song.id !== action.payload.id ) ],
+            next: [ ...new Set([ ...state.next, action.payload ])],
+            prev: [ ...new Set( state.prev.filter( e => e.id !== action.payload.id ))],
         };
 
-        // plays next track
-        case 'play-next':
+        // removes song
+        case 'remove':
         return {
-            next: state.next.slice( 1 ),
-            prev: state.next[0] ? [ state.next[0], ...state.prev ] : state.prev,
+            next: [ ...new Set( state.next.filter( e => e.id !== action.payload.id ))],
+            prev: [ ...new Set( state.prev.filter( e => e.id !== action.payload.id ))],
         };
 
-        // plays prev track
-        case 'play-prev':
+        // removes song
+        case 'init':
         return {
-            next: state.prev[0] ? [ state.prev[0], ...state.next ] : state.next,
-            prev: state.prev.slice( 1 ),
-        };
-
-
-        // plays prev track
-        case 'read':
-        return {
-            next: action.payload.next,
-            prev: action.payload.prev,
-        };
-
-
-        // plays prev track
-        case 'next-to-prev':
-        return {
-            next: state.next.filter( song => song.id !== action.payload.id ),
-            prev: [ action.payload, ...state.prev ],
-        };
-
-
-        // plays prev track
-        case 'prev-to-next':
-        return {
-            next: [ action.payload, ...state.next ],
-            prev: state.prev.filter( song => song.id !== action.payload.id ),
+            next: [ ...new Set( action.payload.next )],
+            prev: [ ...new Set( action.payload.prev )],
         };
     };
 };

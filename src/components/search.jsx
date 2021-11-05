@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
 
 // store context
@@ -8,8 +8,10 @@ import { StoreContext } from '../context/store';
 import config from '@/config/config';
 
 // local components
-import OnPlaylist from '@/components/song/onPlaylist';
-import SearchResult from '@/components/song/searchResult';
+import Now from '@/components/song/now';
+import Raw from '@/components/song/raw';
+import Next from '@/components/song/next';
+import Prev from '@/components/song/prev';
 
 
 /*  Component schema
@@ -18,7 +20,7 @@ import SearchResult from '@/components/song/searchResult';
 export default function Search() {
 
     // global state
-    const { state, dispatchState } = useContext( StoreContext );
+    const { state, paused, loadAndPlay, toggleAudio, playNow, addNext, add, remove } = useContext( StoreContext );
 
 
     // side menu expand state
@@ -26,76 +28,120 @@ export default function Search() {
     const [ result, setResult ] = useState( [] );
     const [ search, setSearch ] = useState( '' );
 
-
     // API call debounce interval
     const timeoutRef = useRef();
 
 
-    // search handlers
-    function updateSearch( event ) {
-
-        // clear before timeout
-        clearTimeout( timeoutRef.current );
-
-        // parse target value
-        const { value } = event.target;
-
-        // update state
-        setSearch( value );
-
-        // set API call
-        timeoutRef.current = setTimeout(() => getResults( value ), 1000 );
-    };
-
-    async function getResults( data ) {
-
-        // prevent api call if data to shoort
-        if( data.length < 4 ) { return; }
-
-        // try to make api call
-        try {
-
-            // create proper url
-            const url = new URL( config.google.base + config.google.string + data );
-
-            // await for server response
-            const response = await axios.get( url );
-
-            // parse items
-            const items = response?.data?.items;
-
-            // update result
-            setResult( items.length ? items : [] );
-
-        } catch( err ) {
-
-            // show error in console
-            console.error( err );
-        }
-    };
-
+    // search utility functions
     function clearAll() {
         setResult( [] );
         setSearch( '' );
     };
 
+    function handleSearch( event ) {
+        clearTimeout( timeoutRef.current );
 
-    // actions handlers
-    function addToPlaylist( payload ) {
-        dispatchState({ type: 'add', payload: payload });
-        clearAll();
+        // parse value
+        const { value } = event.target;
+
+        // update value
+        setSearch( value );
+
+        // request API call
+        timeoutRef.current = setTimeout(() => processSearch( value ), 800 );
     };
 
-    function nextToPrev( payload ) {
-        dispatchState({ type: 'next-to-prev', payload: payload });
-        clearAll();
+    async function processSearch( value ) {
+
+        // prevent to short call
+        if( value.length < 4 ) { return; }
+
+        try {
+
+            // create request url
+            const url = new URL( config.google.base + config.google.string + value );
+
+            // await for request
+            const response = await axios.get( url );
+
+            // parse items
+            const items = response.data.items;
+
+            // set good response
+            if( items.length ) { setResult( items ); };
+
+        } catch( err ) {
+
+            // show error
+            console.error( err );
+        };
     };
 
-    function prevToNext( payload ) {
-        dispatchState({ type: 'prev-to-next', payload: payload });
-        clearAll();
-    };
+    async function fetchSong( payload ) {
+        
+        try {
 
+            // create request url
+            const url = new URL( config.ytmp3.base + payload.id );
+
+            // await for request
+            const response = await axios.get( url, { headers: config.ytmp3.headers });
+
+            // parse src
+            const src = response.data.link;
+
+            // test src
+            if( src.length ) {
+
+                // response success
+                payload.src = src;
+                return payload;
+
+            } else {
+
+                // return null
+                return null;
+            }
+
+        } catch( err ) {
+
+            // show error
+            console.error( err );
+
+            // return null as result
+            return null;
+        };
+    }
+
+
+    // search result functions
+    async function fetchAndPlay( payload ) {
+        const song = await fetchSong( payload );
+
+        if( song ) { playNow( song ); }
+
+        clearAll();
+    }
+
+    async function fetchAndAddNext( payload ) {
+        const song = await fetchSong( payload );
+
+        if( song ) { addNext( song ); }
+
+        clearAll();
+    }
+
+    async function fetchAndAdd( payload ) {
+        const song = await fetchSong( payload );
+
+        if( song ) { add( song ); }
+
+        clearAll();
+    }
+
+
+    //  expand when there is no music left
+    useEffect(() => { if( !state.next[0] ) { setExpand( true ); } });
 
 /*  Component layout
 /*   *   *   *   *   *   *   *   *   *   */
@@ -106,8 +152,11 @@ return(
 
 
             <div id='yt-search'>
+
                 <button className={ expand ? 'expand' : '' } onClick={ () => setExpand( false ) }></button>
-                <input className={ expand ? 'expand' : '' } value={ search } type='text' onFocus={ () => setExpand( true ) } onChange={ updateSearch }/>
+
+                <input className={ expand ? 'expand' : '' } type='text' onFocus={ () => setExpand( true ) } onChange={ handleSearch } value={ search } />
+
             </div>
 
 
@@ -117,7 +166,15 @@ return(
                 <ul className={ `search-result ${ result.length ? '' : 'hide' }` }>
                     <h3>Wyniki</h3>
                     {
-                        result.map(( raw, i ) => <SearchResult key={ raw.etag } raw={ raw } delay={ i } action={ addToPlaylist } />)
+                        result.map( raw => <Raw key={ raw.etag } raw={ raw } actions={[ fetchAndPlay, fetchAndAddNext, fetchAndAdd ]} />)
+                    }
+                </ul>
+
+
+                <ul className='playlist now'>
+                    <h3>Teraz</h3>
+                    {
+                        state.next[0] ? <Now song={ state.next[0] } paused={ paused } actions={[ toggleAudio, loadAndPlay, remove ]} /> : null
                     }
                 </ul>
 
@@ -125,14 +182,15 @@ return(
                 <ul className='playlist next'>
                     <h3>W kolejce</h3>
                     {
-                        state.next.map( song => <OnPlaylist key={ song.id } song={ song } action={ nextToPrev } onPlaylistNext={ true } />)
+                        state.next.map(( song, index ) => index ? <Next key={ song.id } song={ song } actions={[ playNow, addNext, remove ]} /> : null )
                     }
                 </ul>
+
 
                 <ul className='playlist prev'>
                     <h3>Wcześniejsze</h3>
                     {
-                        state.prev.map( song => <OnPlaylist key={ song.id } song={ song } action={ prevToNext } onPlaylistNext={ false } />)
+                        state.prev.map( song => <Prev key={ song.id } song={ song } actions={[ playNow, add, remove ]} />)
                     }
                 </ul>
 

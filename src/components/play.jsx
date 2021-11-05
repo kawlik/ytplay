@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useRef } from 'react';
 
 // store context
 import { StoreContext } from '../context/store';
@@ -15,114 +15,42 @@ import PauseIcon from '@mui/icons-material/Pause';
 export default function Play() {
 
     // global state
-    const { state, dispatchState } = useContext( StoreContext );
+    const { audio, state, paused, loadAndPlay, toggleAudio, playNext, playPrev } = useContext( StoreContext );
 
-    // audio object and play pause state
-    const [ audio, setAudio ] = useState( new Audio() );
-    const [ pause, setPause ] = useState( true );
-
-
-    // audio handlers
-    function setAudioSong( song ) {
-        audio.setAttribute( 'src', song );
-        audio.load();
-    };
-
-    function resetAudio() {
-        audio.removeAttribute( 'src' );
-        audio.load();
-    }
-
-    function playAudio() {
-        setPause( false );
-        audio.play();
-    };
-
-    function pauseAudio() {
-        setPause( true );
-        audio.pause();
-    };
+    // animation ref
+    const animationRef = useRef();
 
 
-    // button handlers
-    function togglePlayPause() {
-        
-        // loads or skips song
-        if( !audio.src ) {
-
-            if( state.next[0] ) { setAudioSong( state.next[0].src ); }
-            else return;
-        }
-
-        // toggles play pause
-        audio.paused ? playAudio() : pauseAudio();
-    }
-
-    function reload() {
-
-        // is track available
-        if( state.next[0] ) {
-            setAudioSong( state.next[0].src );
-            playAudio();
-        }
-    };
-
-    function playNext() {
-        pauseAudio();
-        resetAudio();
-
-        // loads or skips song
-        if( state.next[1] ) {
-
-            // play audio
-            setAudioSong( state.next[1].src );
-            setPause( false );
-            playAudio();
-        }
-
-        // global state dispatch
-        dispatchState({ type: 'play-next' });
-    }
-
-    function playPrev() {
-        pauseAudio();
-        resetAudio();
-
-        // loads or skips song
-        if( state.prev[0] ) {
-
-            // play audio
-            setAudioSong( state.prev[0].src );
-            setPause( false );
-            playAudio();
-        }
-
-        // global state dispatch
-        dispatchState({ type: 'play-prev' });
-    }
-
-
-    // on effect animations
+    // animate time bar
     useEffect(() => {
 
+        // animation function
         function animate() {
 
-            // update value
-            document.querySelector( '#input-timing .track' ).max = audio.duration;
-            document.querySelector( '#input-timing .track' ).value = audio.currentTime;
+            // timing range
+            document.querySelector( '#input-timing .track' ).max = audio.current.duration;
+            document.querySelector( '#input-timing .track' ).value = audio.current.currentTime;
 
-            // update view
-            document.querySelector( '#input-timing .t-now' ).textContent = parseTime( audio.currentTime );
-            document.querySelector( '#input-timing .t-end' ).textContent = parseTime( audio.duration );
+            // timing display
+            document.querySelector( '#input-timing .t-now' ).textContent = parseTime( audio.current.duration );
+            document.querySelector( '#input-timing .t-end' ).textContent = parseTime( audio.current.currentTime );
 
+            // make animation request
+            animationRef.current = requestAnimationFrame( animate );
 
-            // request next animation
-            requestAnimationFrame( animate );
         };
 
+        // start animation
         animate();
 
-    });
+        // cancel animation
+        return (() => {
+
+            cancelAnimationFrame( animationRef.current );
+        });
+
+    }, []);
+
 
 /*  Component layout
 /*   *   *   *   *   *   *   *   *   *   */
@@ -158,14 +86,14 @@ return(
 
             <div className='row actions'>
 
-                <button className='skip-prev' onClick={ reload } onDoubleClick={ playPrev }>
+                <button className='skip-prev' onClick={ loadAndPlay } onDoubleClick={ playPrev }>
                     <SkipPreviousIcon />
                 </button>
 
 
-                <button className='play-pause' onClick={ togglePlayPause }>
+                <button className='play-pause' onClick={ toggleAudio }>
                     {
-                        audio.paused
+                        paused
                         ? <PlayArrowIcon />
                         : <PauseIcon />
                     }
