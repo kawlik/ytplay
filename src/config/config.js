@@ -28,8 +28,8 @@ export default {
 
     // PWA setings
     PWA: {
-        name: 'yt play',
-        short_name: 'yt play',
+        name: 'YTPLAY',
+        short_name: 'YTPLAY',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',

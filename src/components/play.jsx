@@ -15,39 +15,40 @@ import PauseIcon from '@mui/icons-material/Pause';
 export default function Play() {
 
     // global state
-    const { audio, state, paused, loadAndPlay, toggleAudio, playNext, playPrev } = useContext( StoreContext );
+    const { audio, state, paused, updateAndPlay, loadAndPlay, toggleAudio, playNext, playPrev } = useContext( StoreContext );
 
     // animation ref
     const animationRef = useRef();
 
+    // update curr time
+    function update( event ) {
+        updateAndPlay( event.target.value );
+        animate();
+    };
 
+    // animation function
+    function animate() {
+
+        // timing range
+        document.querySelector( '#input-timing .track' ).max = audio.current.duration;
+        document.querySelector( '#input-timing .track' ).value = audio.current.currentTime;
+
+        // timing display
+        document.querySelector( '#input-timing .t-end' ).textContent = parseTime( audio.current.duration );
+        document.querySelector( '#input-timing .t-now' ).textContent = parseTime( audio.current.currentTime );
+
+        // make animation request
+        animationRef.current = requestAnimationFrame( animate );
+    };
+    
     // animate time bar
     useEffect(() => {
-
-        // animation function
-        function animate() {
-
-            // timing range
-            document.querySelector( '#input-timing .track' ).max = audio.current.duration;
-            document.querySelector( '#input-timing .track' ).value = audio.current.currentTime;
-
-            // timing display
-            document.querySelector( '#input-timing .t-now' ).textContent = parseTime( audio.current.duration );
-            document.querySelector( '#input-timing .t-end' ).textContent = parseTime( audio.current.currentTime );
-
-            // make animation request
-            animationRef.current = requestAnimationFrame( animate );
-
-        };
 
         // start animation
         animate();
 
         // cancel animation
-        return (() => {
-
-            cancelAnimationFrame( animationRef.current );
-        });
+        return (() => { cancelAnimationFrame( animationRef.current ) });
 
     }, []);
 
@@ -75,7 +76,7 @@ return(
 
             <div className='row timing' id='input-timing'>
 
-                <input className='track' type='range' min={ 0 } max={ 0 } />
+                <input className='track' type='range' min={ 0 } max={ 0 } onTouchStart={ () => cancelAnimationFrame( animationRef.current ) } onTouchEnd={ update } />
 
                 <span className='t-now'>0:00</span>
 
@@ -115,6 +116,8 @@ return(
 /*  Utility functions
 /*   *   *   *   *   *   *   *   *   *   */
 
+
+// time parsing function
 function parseTime( value ) {
     return Number.isNaN( value ) ? '0:00' : `${ Math.floor( value / 60 ) }:${ Math.ceil( value ) % 60 > 9 ? Math.ceil( value ) % 60 : '0' + Math.ceil( value ) % 60 }`;
 };

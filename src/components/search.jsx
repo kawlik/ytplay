@@ -96,21 +96,16 @@ export default function Search() {
                 // response success
                 payload.src = src;
                 return payload;
-
-            } else {
-
-                // return null
-                return null;
             }
 
         } catch( err ) {
 
             // show error
             console.error( err );
-
-            // return null as result
-            return null;
         };
+
+        // return null as result
+        return null;
     }
 
 

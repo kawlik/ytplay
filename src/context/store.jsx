@@ -31,11 +31,51 @@ export function StoreProvider({ children }) {
 /*  Component handlers
 /*   *   *   *   *   *   *   *   *   *   */
 
-    function loadAndPlay() {
+    async function fetchSRC( id ) {
+
+        try {
+
+            // create request url
+            const url = new URL( config.ytmp3.base + id );
+
+            // await for request
+            const response = await axios.get( url, { headers: config.ytmp3.headers });
+
+            // parse src
+            const src = response.data.link;
+
+            // test src
+            if( src.length ) {
+                return src;
+            }
+
+        } catch( err ) {
+
+            // show err
+            console.error( err );
+        }
+
+        // return null as result
+        return null;
+    };
+
+    async function updateAndPlay( time ) {
+        if( time < audio.current.duration ) {        
+            audio.current.currentTime = time;
+        }
+    };
+
+    async function loadAndPlay() {
         audio.current.pause();
         setPaused( true );
 
         if ( state.next[0] ) {
+
+            // test song link freshness
+            if( state.next[0].date < Date.now() - ( 1000 * 60 * 60 * 24 )) {
+                state.next[0].src = await fetchSRC( state.next[0].id ) || '';
+                state.next[0].date = Date.now();
+            }
 
             audio.current.src = state.next[0].src;
             audio.current.load();
@@ -44,9 +84,9 @@ export function StoreProvider({ children }) {
         };
     };
 
-    function toggleAudio() {
+    async function toggleAudio() {
 
-        if( audio.current.src ) {
+        if( audio.current.src && state.next[0].date < Date.now() - ( 1000 * 60 * 60 * 24 )) {
 
             if( audio.current.paused ){
 
@@ -61,21 +101,22 @@ export function StoreProvider({ children }) {
 
         } else {
 
-            if( state.next[0] ) {
-
-                audio.current.src = state.next[0].src;
-                audio.current.load();
-                audio.current.play();
-                setPaused( false );
-            }
+            loadAndPlay();
         }
     };
 
-    function playNext() {
+    async function playNext() {
         audio.current.pause();
         setPaused( true );
 
         if( state.next[1] ) {
+
+            // test song link freshness
+            if( state.next[1].date < Date.now() - ( 1000 * 60 * 60 * 24 )) {
+                state.next[1].src = await fetchSRC( state.next[1].id ) || '';
+                state.next[1].date = Date.now();
+            }
+
             audio.current.src = state.next[1].src;
             audio.current.load();
             audio.current.play();
@@ -85,11 +126,18 @@ export function StoreProvider({ children }) {
         dispatchState({ type: 'play-next' })
     };
 
-    function playPrev() {
+    async function playPrev() {
         audio.current.pause();
         setPaused( true );
 
         if( state.prev[0] ) {
+
+            // test song link freshness
+            if( state.prev[0].date < Date.now() - ( 1000 * 60 * 60 * 24 )) {
+                state.prev[0].src = await fetchSRC( state.prev[0].id ) || '';
+                state.next[0].date = Date.now();
+            }
+
             audio.current.src = state.prev[0].src;
             audio.current.load();
             audio.current.play();
@@ -99,8 +147,14 @@ export function StoreProvider({ children }) {
         dispatchState({ type: 'play-prev' })
     };
 
-    function playNow( payload ) {
+    async function playNow( payload ) {
         audio.current.pause();
+
+        // test song link freshness
+        if( payload.date < Date.now() - ( 1000 * 60 * 60 * 24 )) {
+            payload.src = await fetchSRC( payload.id ) || '';
+            payload.date = Date.now();
+        }
 
         audio.current.src = payload.src;
         audio.current.load();
@@ -139,7 +193,7 @@ export function StoreProvider({ children }) {
 
     function remove( payload ) {
 
-        if( state.next[0].src === payload.src ) {
+        if( state.next[0]?.id === payload.id ) {
             audio.current.pause();
             setPaused( true );
         };
@@ -147,6 +201,9 @@ export function StoreProvider({ children }) {
         dispatchState({ type: 'remove', payload: payload });
     };
 
+        
+    // audio on ended effect
+    audio.current.onended = playNext;
 
     //  read stored data
     useEffect(() => {
@@ -158,7 +215,7 @@ export function StoreProvider({ children }) {
         // create payload
         const payload = {
             next: localNext?.length ? localNext : [],
-            prev: localPrev?.length ? localNext : [],
+            prev: localPrev?.length ? localPrev : [],
         };
 
         // make initial dispatch
@@ -174,9 +231,10 @@ export function StoreProvider({ children }) {
         localStorage.setItem( 'ytplay.next', JSON.stringify( state.next ));
         localStorage.setItem( 'ytplay.prev', JSON.stringify( state.prev ));
 
+        console.log( state )
     });
 
-    
+
 /*  Component layout
 /*   *   *   *   *   *   *   *   *   *   */
 
@@ -187,6 +245,7 @@ const storeValue = {
     audio, paused, state,
 
     // global state
+    updateAndPlay,
     loadAndPlay,
     toggleAudio,
     playNext,
