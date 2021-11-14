@@ -1,0 +1,57 @@
+section.search .toggler {
+
+    width: 2rem;
+    height: 2rem;
+
+    background: none;
+    outline: none;
+    border: none;
+    
+    transform: translate( -3rem, 0 );
+    position: relative;
+
+    &::before, &::after {
+
+        @include transition();
+
+        content: '';
+        height: .2rem;
+        width: 100%;
+
+        position: absolute;
+        overflow: hidden;
+        left: 50%;
+        top: 50%;
+
+        transform: translate( -50%, -50% ) rotate( 0 );
+        background-color: white;
+        border-radius: 1rem;
+    }
+
+    &::before {
+
+        box-shadow: 0 .8rem white;
+    }
+
+    &::after {
+
+        box-shadow: 0 -.8rem white;
+    }
+
+    &.expand {
+
+        transform: translate( 0, 0 );
+
+        &::before {
+
+            transform: translate( -50%, -50% ) rotate( -45deg );
+            box-shadow: 0 0 white;
+        }
+    
+        &::after {
+    
+            transform: translate( -50%, -50% ) rotate( 45deg );
+            box-shadow: 0 0 white;
+        }
+    }
+}

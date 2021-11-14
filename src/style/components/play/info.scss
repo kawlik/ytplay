@@ -1,0 +1,32 @@
+section.play .row.info {
+
+    p {
+        
+        position: relative;
+        overflow-x: hidden;
+        height: 1.5rem;
+
+        span {
+
+            position: absolute;
+            top: 50%;
+            left: 0;
+
+            width: max-content;
+            transform: translate( 0, -50% );
+        }
+
+        &.title {
+
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        &.author {
+
+            font-size: 1rem;
+            letter-spacing: .1rem;
+            text-transform: uppercase;
+        }
+    }
+}

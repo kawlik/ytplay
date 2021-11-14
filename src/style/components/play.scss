@@ -1,126 +1,27 @@
-.play {
+section.play {
 
-    background-color: $c-light;
-    width: 100%;    
-
+    width: 100%;
     gap: 1rem;
-    padding: 1rem;
-    padding-bottom: 2rem;
 
     display: flex;
     flex-wrap: nowrap;
     flex-direction: column;
 
-    justify-content: space-around;
+    justify-content: space-between;
     align-content: center;
     align-items: center;
 
     .row {
 
         width: 100%;
-
-        display: flex;
-        flex-wrap: nowrap;
-        flex-direction: row;
-    
-        justify-content: space-evenly;
-        align-content: center;
-        align-items: center;
-
-        &.info {
-
-            color: $c-action;
-            overflow-x: hidden;
-            gap: 0.5rem;
-
-            flex-direction: column;
-            justify-content: space-around;
-
-            p {
-
-                height: 1.5rem;
-                width: 90%;
-
-                overflow-x: hidden;
-                position: relative;
-
-                span {
-
-                    position: absolute;
-                    top: 50%;
-                    left: 0;
-
-                    width: max-content;
-                    transform: translateX( 0 ) translateY( -50% );
-
-                    &.title {
-
-                        font-style: italic;
-                        font-size: 1.1rem;
-                    }
-    
-                    &.author {
-    
-                        text-transform: uppercase;
-                        letter-spacing: 0.1rem;
-                        font-size: 0.9rem;
-                    }
-                }
-            }
-        }
-
-        &.timing {
-
-            flex-wrap: wrap;
-            justify-content: space-between;
-
-            .track {
-                flex-basis: 100%;
-                display: block;
-            }
-
-            span {
-
-                color: $c-action;
-            }
-        }
-
-        &.actions {
-
-            gap: 1rem;
-
-            button {
-
-                border: none;
-                outline: none;
-                border-radius: 3rem;
-
-                background-color: #ffffff;
-                box-shadow: 0 0 1rem -0.2rem #00eeaa;
-                transition: all ease 0.2s;
-
-                height: 2.5rem;
-                width: 2.5rem;
-
-                &.play-pause {
-
-                    height: 3rem;
-                    width: 3rem;    
-                }
-
-                svg {
-
-                    font-size: 1.75rem;
-                    vertical-align: middle;
-                    color: $c-action;
-                }
-
-                &:active {
-
-                    transform: scale( 0.95 );
-                    box-shadow: 0 0 1rem -0.1rem #00eeaa;
-                }
-            }
-        }
     }
 }
+
+/*  Sub-Components
+/*   *   *   *   *   *   *   *   *   *   */
+
+@import 'play/actions';
+
+@import 'play/timing';
+
+@import 'play/info';

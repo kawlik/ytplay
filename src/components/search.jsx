@@ -74,6 +74,9 @@ export default function Search() {
 
             // show error
             console.error( err );
+
+            // show alert
+            alert( err.message );
         };
     };
 
@@ -102,6 +105,9 @@ export default function Search() {
 
             // show error
             console.error( err );
+            
+            // show alert
+            alert( err.message );
         };
 
         // return null as result
@@ -146,19 +152,14 @@ return(
         <section className={ `search ${ expand ? 'expand' : '' }` }>
 
 
-            <div id='yt-search'>
+            <button className={ `toggler ${expand ? 'expand' : ''}` } onClick={ () => setExpand( prev => !prev ) }></button>
 
-                <button className={ expand ? 'expand' : '' } onClick={ () => setExpand( false ) }></button>
+            <input className='search-bar' type='text' onChange={ handleSearch } value={ search } placeholder='Szukaj' />
 
-                <input className={ expand ? 'expand' : '' } type='text' onFocus={ () => setExpand( true ) } onChange={ handleSearch } value={ search } />
-
-            </div>
+            <article className='menu' >
 
 
-            <article className={ `hidden ${ expand ? 'display' : '' }` }>
-
-
-                <ul className={ `search-result ${ result.length ? '' : 'hide' }` }>
+                <ul className={ `playlist ${ result.length ? '' : 'hide' }` }>
                     <h3>Wyniki</h3>
                     {
                         result.map( raw => <Raw key={ raw.etag } raw={ raw } actions={[ fetchAndPlay, fetchAndAddNext, fetchAndAdd ]} />)
@@ -166,7 +167,7 @@ return(
                 </ul>
 
 
-                <ul className='playlist now'>
+                <ul className={ `playlist ${ state.next[0] ? '' : 'hide' }` }>
                     <h3>Teraz</h3>
                     {
                         state.next[0] ? <Now song={ state.next[0] } paused={ paused } actions={[ toggleAudio, loadAndPlay, remove ]} /> : null
@@ -174,7 +175,7 @@ return(
                 </ul>
 
 
-                <ul className='playlist next'>
+                <ul className={ `playlist ${ state.next[1] ? '' : 'hide' }` }>
                     <h3>W kolejce</h3>
                     {
                         state.next.map(( song, index ) => index ? <Next key={ song.id } song={ song } actions={[ playNow, addNext, remove ]} /> : null )
@@ -182,7 +183,7 @@ return(
                 </ul>
 
 
-                <ul className='playlist prev'>
+                <ul className={ `playlist ${ state.prev[0] ? '' : 'hide' }` }>
                     <h3>Wcześniejsze</h3>
                     {
                         state.prev.map( song => <Prev key={ song.id } song={ song } actions={[ playNow, add, remove ]} />)

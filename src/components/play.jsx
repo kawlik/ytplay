@@ -63,24 +63,13 @@ return(
 
             <div className='row info'>
 
-                <p id='animated-song-title'>
-                    <span className='title'>{ state.next[0] ? state.next[0].title : '' }</span>
+                <p className='title'>
+                    <span>{ state.next[0] ? state.next[0].title : '' }</span>
                 </p>
 
-                <p>
-                    <span className='author'>{ state.next[0] ? state.next[0].author : '' }</span>
+                <p className='author'>
+                    <span>{ state.next[0] ? state.next[0].author : '' }</span>
                 </p>
-
-            </div>
-
-
-            <div className='row timing' id='input-timing'>
-
-                <input className='track' type='range' min={ 0 } max={ 0 } onTouchStart={ () => cancelAnimationFrame( animationRef.current ) } onTouchEnd={ update } />
-
-                <span className='t-now'>0:00</span>
-
-                <span className='t-end'>0:00</span>
 
             </div>
 
@@ -107,6 +96,17 @@ return(
 
             </div>
 
+
+            <div className='row timing' id='input-timing'>
+
+                <span className='t-now'>0:00</span>
+
+                <span className='t-end'>0:00</span>
+
+                <input className='track' type='range' min={ 0 } max={ 0 } onTouchStart={ () => cancelAnimationFrame( animationRef.current ) } onTouchEnd={ update } />
+
+            </div>
+            
 
         </section>
     </>

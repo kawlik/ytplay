@@ -53,6 +53,9 @@ export function StoreProvider({ children }) {
 
             // show err
             console.error( err );
+            
+            // show alert
+            alert( err.message );
         }
 
         // return null as result
@@ -67,7 +70,6 @@ export function StoreProvider({ children }) {
 
     async function loadAndPlay() {
         audio.current.pause();
-        setPaused( true );
 
         if ( state.next[0] ) {
 
@@ -80,24 +82,16 @@ export function StoreProvider({ children }) {
             audio.current.src = state.next[0].src;
             audio.current.load();
             audio.current.play();
-            setPaused( false );
         };
     };
 
     async function toggleAudio() {
 
-        if( audio.current.src && state.next[0].date < Date.now() - ( 1000 * 60 * 60 * 24 )) {
+        if( audio.current.src && state.next[0].date > Date.now() - ( 1000 * 60 * 60 * 24 )) {
 
-            if( audio.current.paused ){
-
-                audio.current.play();
-                setPaused( false );
-
-            } else {
-
-                audio.current.pause();
-                setPaused( true );
-            }
+            if( audio.current.paused ) { audio.current.play(); }
+            
+            else { audio.current.pause(); }
 
         } else {
 
@@ -107,7 +101,6 @@ export function StoreProvider({ children }) {
 
     async function playNext() {
         audio.current.pause();
-        setPaused( true );
 
         if( state.next[1] ) {
 
@@ -120,7 +113,6 @@ export function StoreProvider({ children }) {
             audio.current.src = state.next[1].src;
             audio.current.load();
             audio.current.play();
-            setPaused( false );
         }
 
         dispatchState({ type: 'play-next' })
@@ -128,7 +120,6 @@ export function StoreProvider({ children }) {
 
     async function playPrev() {
         audio.current.pause();
-        setPaused( true );
 
         if( state.prev[0] ) {
 
@@ -141,7 +132,6 @@ export function StoreProvider({ children }) {
             audio.current.src = state.prev[0].src;
             audio.current.load();
             audio.current.play();
-            setPaused( false );
         }
 
         dispatchState({ type: 'play-prev' })
@@ -159,7 +149,6 @@ export function StoreProvider({ children }) {
         audio.current.src = payload.src;
         audio.current.load();
         audio.current.play();
-        setPaused( false );
 
         dispatchState({ type: 'play-now', payload: payload });
     };
@@ -171,7 +160,6 @@ export function StoreProvider({ children }) {
             audio.current.src = payload.src;
             audio.current.load();
             audio.current.play();
-            setPaused( false );
         }
 
         dispatchState({ type: 'add-next', payload: payload });
@@ -185,7 +173,6 @@ export function StoreProvider({ children }) {
             audio.current.src = payload.src;
             audio.current.load();
             audio.current.play();
-            setPaused( false );
         }
 
         dispatchState({ type: 'add', payload: payload });
@@ -195,7 +182,6 @@ export function StoreProvider({ children }) {
 
         if( state.next[0]?.id === payload.id ) {
             audio.current.pause();
-            setPaused( true );
         };
 
         dispatchState({ type: 'remove', payload: payload });
@@ -204,6 +190,10 @@ export function StoreProvider({ children }) {
         
     // audio on ended effect
     audio.current.onended = playNext;
+
+    // audio play pause auto toggle
+    audio.current.onplay = () => setPaused( false );
+    audio.current.onpause = () => setPaused( true );
 
     //  read stored data
     useEffect(() => {
@@ -221,6 +211,7 @@ export function StoreProvider({ children }) {
         // make initial dispatch
         dispatchState({ type: 'init', payload: payload });
 
+
     }, []);
 
 
@@ -230,8 +221,6 @@ export function StoreProvider({ children }) {
         // read local data
         localStorage.setItem( 'ytplay.next', JSON.stringify( state.next ));
         localStorage.setItem( 'ytplay.prev', JSON.stringify( state.prev ));
-
-        console.log( state )
     });
 
 
@@ -321,7 +310,7 @@ function stateReducer( state, action ) {
             
             return {
                 next: [ action.payload ],
-                prev: state.prev,
+                prev: state.prev.filter( e => e.id !== action.payload.id ),
             };
         }
 

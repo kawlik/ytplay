@@ -1,0 +1,38 @@
+section.play .row.actions {
+
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+
+    justify-content: space-around;
+    align-content: center;
+    align-items: center;
+
+    button {
+
+        @include transition();
+
+        border: none;
+        outline: none;
+        background: none;
+
+        color: $c-light;
+
+        svg {
+
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+
+        &.play-pause svg {
+
+            width: 4rem;
+            height: 4rem;
+        }
+
+        &:active {
+
+            transform: scale( .7 );
+        }
+    }
+}

@@ -13,7 +13,7 @@ Widok aplikacji do wyszukiwania i odtwarzania muzyki z serwisu YouTube bez rekla
 
 ## Do zrobienia
 
- - [ ] Ulepszyć style - póki co nie są zoptymalizowanie ani zbyt ładne
+ - [x] Ulepszyć style - póki co nie są zoptymalizowanie ani zbyt ładne ( wciąż nie są ładne, głónie playlisty :/ )
  - [ ] Dodać audentykację po indywidualnych kluczach API
 
 ## Uwagi

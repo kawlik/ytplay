@@ -1,0 +1,32 @@
+ul.playlist {
+
+    list-style: none;
+    width: 100%;
+    gap: .5rem;
+
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+
+    justify-content: flex-start;
+    align-content: center;
+    align-items: center;
+
+    padding: .5rem;
+    border: .2rem solid white;
+    border-radius: .5rem;
+
+    &.hide {
+
+        display: none;
+    }
+
+    h3 {
+
+        display: block;
+        width: 100%;
+
+        font-size: 1.25rem;
+        letter-spacing: .1rem;
+    }
+}

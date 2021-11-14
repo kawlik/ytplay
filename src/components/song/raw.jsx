@@ -37,9 +37,9 @@ return(
 
             <div className='info'>
 
-                <p><span className='title'>{ song.title }</span></p>
+                <p className='title'><span>{ song.title }</span></p>
 
-                <p><span className='author'>{ song.author }</span></p>
+                <p className='author'><span>{ song.author }</span></p>
 
             </div>
 

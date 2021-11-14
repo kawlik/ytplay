@@ -1,0 +1,16 @@
+section.play .row.timing {
+
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+
+    justify-content: space-between;
+    align-content: center;
+    align-items: center;
+
+    .track {
+
+        margin-top: .5rem;
+        flex-basis: 100%;
+    }
+}

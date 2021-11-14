@@ -24,10 +24,10 @@ return(
             <img className='img' src={ song.img } alt={ song.author }/>
 
             <div className='info'>
+                
+                <p className='title'><span>{ song.title }</span></p>
 
-                <p><span className='title'>{ song.title }</span></p>
-
-                <p><span className='author'>{ song.author }</span></p>
+                <p className='author'><span>{ song.author }</span></p>
 
             </div>
 
